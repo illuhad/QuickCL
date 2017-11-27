@@ -336,7 +336,7 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 /// This can be circumvented by using several calls to QCL_RAW,
 /// as each one will be terminated by a newline, or by using
 /// C++11 raw string literals instead.
-#define QCL_RAW(source) BOOST_PP_STRINGIZE(source) "\n";
+#define QCL_RAW(source) BOOST_PP_STRINGIZE(source) "\n"
 
 
 

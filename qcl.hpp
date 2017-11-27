@@ -31,7 +31,10 @@
 
 #define CL_HPP_TARGET_OPENCL_VERSION 120
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
-#define WITH_BOOST_COMPUTE_COMPAT
+
+// undefine this to enable some additional compatibility features
+// for using QCL in conjunction with boost.compute.
+//#define WITH_BOOST_COMPUTE_COMPAT
 
 #include <CL/cl2.hpp>
 

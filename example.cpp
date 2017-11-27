@@ -29,6 +29,7 @@
 #include <vector>
 #include <iostream>
 #include "qcl.hpp"
+#include "qcl_module.hpp"
 
 // Here, we define our OpenCL code.
 // While QCL can also just use source files or source
@@ -55,6 +56,7 @@ QCL_STANDALONE_SOURCE
                       __global T* output)
     {
       int gid = get_global_id(0);
+      
       output[gid] = input_a[gid] + input_b[gid];
     }
   )
