@@ -306,14 +306,14 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 /// Note that currently, there is no dedection of cyclic dependencies,
 /// so be careful when including modules.
 /// \param module The name of the source module that shall be included
-#define QCL_INCLUDE_MODULE(module) module::_qcl_get_source()+
+#define QCL_INCLUDE_MODULE(module) module::_qcl_source()+
 
 /// Make a template type argument accessible from the CL source.
 /// This call must be nested inside a \c QCL_STANDALONE_SOURCE() or
 /// \c QCL_MAKE_SOURCE() call (see their documentation for more information).
 /// \param template_parameter The template parameter
 #define QCL_IMPORT_TYPE(template_parameter) \
-  std::string("\n#define " BOOST_PP_STRINGIZE(template_parameter) " ") \
+  std::string{"\n#define " BOOST_PP_STRINGIZE(template_parameter) " "} \
   + std::string(qcl::detail::cl_type_translator<template_parameter>::value) \
   + std::string{"\n"} +
 
