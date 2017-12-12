@@ -26,6 +26,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef QCL_BOOST_COMPUTE_COMPAT_HPP
+#define QCL_BOOST_COMPUTE_COMPAT_HPP
 
 #include <boost/compute.hpp>
 
@@ -69,3 +71,5 @@ DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_double8, boost::compute::double8_);
 DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_double16, boost::compute::double16_);
 
 }
+
+#endif
