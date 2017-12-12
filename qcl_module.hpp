@@ -337,6 +337,10 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 /// as each one will be terminated by a newline, or by using
 /// C++11 raw string literals instead.
 #define QCL_RAW(source) BOOST_PP_STRINGIZE(source) "\n"
+/// Stringizes the argument as single line and adds a newline.
+#define QCL_SINGLE_LINE(source) "\n" QCL_RAW(source)
+
+
 
 
 

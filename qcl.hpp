@@ -32,9 +32,6 @@
 #define CL_HPP_TARGET_OPENCL_VERSION 120
 #define CL_HPP_MINIMUM_OPENCL_VERSION 120
 
-// undefine this to enable some additional compatibility features
-// for using QCL in conjunction with boost.compute.
-//#define WITH_BOOST_COMPUTE_COMPAT
 
 #include <CL/cl2.hpp>
 
@@ -64,12 +61,6 @@
 #include <stdexcept>
 #include <map>
 #include <cassert>
-
-#ifdef WITH_BOOST_COMPUTE_COMPAT
-#include <boost/compute.hpp>
-#endif
-
-#include "qcl_module.hpp"
 
 
 namespace qcl {
@@ -134,37 +125,6 @@ using buffer_ptr = std::shared_ptr<cl::Buffer>;
 
 using command_queue_id = std::size_t;
 
-#ifdef WITH_BOOST_COMPUTE_COMPAT
-template<class T>
-boost::compute::buffer_iterator<T> create_buffer_iterator(const cl::Buffer& buffer,
-                                                          std::size_t position)
-{
-  return boost::compute::make_buffer_iterator<T>(boost::compute::buffer{buffer.get()},
-                                                 position);
-}
-
-template<class T>
-struct to_boost_vector_type
-{};
-
-#define DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_type, boost_type) \
-  template<> \
-  struct to_boost_vector_type<cl_type> \
-  { \
-    using type = boost_type; \
-  }
-
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_float2, boost::compute::float2_);
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_float4, boost::compute::float4_);
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_float8, boost::compute::float8_);
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_float16, boost::compute::float16_);
-
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_double2, boost::compute::double2_);
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_double4, boost::compute::double4_);
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_double8, boost::compute::double8_);
-DECLARE_BOOST_VECTOR_TYPE_TRANSLATOR(cl_double16, boost::compute::double16_);
-
-#endif
 
 /// This class simplifies passing arguments to kernels
 /// by counting the argument index automatically.
@@ -277,14 +237,6 @@ public:
   {
     return _context;
   }
-
-#ifdef WITH_BOOST_COMPUTE_COMPAT
-  /// \return A boost::compute context based on this context
-  boost::compute::context get_boost_compute_context() const
-  {
-    return boost::compute::context{_context.get()};
-  }
-#endif
   
   /// \return The underlying OpenCL command queue
   /// \param queue The id of the command queue. The id must be greater or
