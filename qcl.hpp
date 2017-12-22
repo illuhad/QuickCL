@@ -1011,11 +1011,29 @@ public:
   {
     _args.reset();
     this->configure_arguments(arguments...);
+    cl_int result = enqueue_kernel();
+    _args.reset();
+
+    return result;
+  }
+
+  template<typename... Args>
+  void partial_argument_list(Args... arguments)
+  {
+    this->configure_arguments(arguments);
+  }
+
+  void discard_partial_arguments()
+  {
+    _args.reset();
+  }
+
+  cl_int enqueue_kernel() const
+  {
     return this->_ctx->enqueue_ndrange_kernel(_kernel,
                                               _work_dim, _group_dim,
                                               _evt, cl::NullRange, _dependencies);
   }
-
 
 private:
   template<typename T, typename... Args>
