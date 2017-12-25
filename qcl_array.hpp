@@ -295,7 +295,7 @@ public:
     assert(initial_data.size() > 0);
 
     _ctx->create_buffer<T>(_buff, initial_data.size());
-
+    this->write(initial_data);
   }
 
 
