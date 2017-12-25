@@ -88,60 +88,6 @@ public:
     return copy;
   }
 
-  friend difference_type operator-(const array_type& a,
-                                   const array_type& b) noexcept
-  { return a._pos - b._pos; }
-
-
-  friend bool operator==(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return a._obj == b._obj && a._pos == b._pos; }
-
-  friend bool operator!=(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return !(a == b); }
-
-  friend bool operator<(const array_iterator& a,
-                        const array_iterator& b) noexcept
-  { return a._pos < b._pos; }
-
-  friend bool operator<=(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return a._pos <= b._pos; }
-
-  friend bool operator>(const array_iterator& a,
-                        const array_iterator& b) noexcept
-  { return a._pos > b._pos; }
-
-  friend bool operator>=(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return a._pos >= b._pos; }
-
-  friend array_iterator operator+(const array_iterator& a,
-                                  difference_type n) noexcept
-  {
-    array_iterator it = a;
-    it += n;
-
-    return it;
-  }
-
-  friend array_iterator operator+(difference_type n,
-                                  const array_iterator& a) noexcept
-  { return  a + n; }
-
-  friend array_iterator operator-(const array_iterator& a,
-                                  difference_type n) noexcept
-  {
-    array_iterator it = a;
-    it -= n;
-
-    return it;
-  }
-
-  friend array_iterator operator+(difference_type n,
-                                  const array_iterator& a) noexcept
-  { return  a - n; }
 
   array_pointer array() const noexcept
   {
@@ -232,61 +178,6 @@ public:
     return copy;
   }
 
-  friend difference_type operator-(const array_type& a,
-                                   const array_type& b) noexcept
-  { return a._pos - b._pos; }
-
-
-  friend bool operator==(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return a._obj == b._obj && a._pos == b._pos; }
-
-  friend bool operator!=(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return !(a == b); }
-
-  friend bool operator<(const array_iterator& a,
-                        const array_iterator& b) noexcept
-  { return a._pos < b._pos; }
-
-  friend bool operator<=(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return a._pos <= b._pos; }
-
-  friend bool operator>(const array_iterator& a,
-                        const array_iterator& b) noexcept
-  { return a._pos > b._pos; }
-
-  friend bool operator>=(const array_iterator& a,
-                         const array_iterator& b) noexcept
-  { return a._pos >= b._pos; }
-
-  friend array_iterator operator+(const array_iterator& a,
-                                  difference_type n) noexcept
-  {
-    array_iterator it = a;
-    it += n;
-
-    return it;
-  }
-
-  friend array_iterator operator+(difference_type n,
-                                  const array_iterator& a) noexcept
-  { return  a + n; }
-
-  friend array_iterator operator-(const array_iterator& a,
-                                  difference_type n) noexcept
-  {
-    array_iterator it = a;
-    it -= n;
-
-    return it;
-  }
-
-  friend array_iterator operator+(difference_type n,
-                                  const array_iterator& a) noexcept
-  { return  a - n; }
-
   array_pointer array() const noexcept
   {
     return _obj;
@@ -309,6 +200,77 @@ private:
   std::size_t _pos;
 };
 
+template<class T, class Array_type>
+typename array_iterator<T,Array_type>::difference_type
+operator-(const array_iterator<T,Array_type>& a,
+          const array_iterator<T,Array_type>& b) noexcept
+{ return a.get_position() - b.get_position(); }
+
+template<class T, class Array_type>
+bool
+operator==(const array_iterator<T,Array_type>& a,
+           const array_iterator<T,Array_type>& b) noexcept
+{ return a.array() == b.array() && a.get_position() == b.get_position(); }
+
+template<class T, class Array_type>
+bool operator!=(const array_iterator<T,Array_type>& a,
+                const array_iterator<T,Array_type>& b) noexcept
+{ return !(a == b); }
+
+template<class T, class Array_type>
+bool operator<(const array_iterator<T,Array_type>& a,
+               const array_iterator<T,Array_type>& b) noexcept
+{ return a.get_position() < b.get_position(); }
+
+template<class T, class Array_type>
+bool operator<=(const array_iterator<T,Array_type>& a,
+                const array_iterator<T,Array_type>& b) noexcept
+{ return a.get_position() <= b.get_position(); }
+
+template<class T, class Array_type>
+bool operator>(const array_iterator<T, Array_type>& a,
+               const array_iterator<T, Array_type>& b) noexcept
+{ return a.get_position() > b.get_position(); }
+
+template<class T, class Array_type>
+bool operator>=(const array_iterator<T,Array_type>& a,
+                const array_iterator<T,Array_type>& b) noexcept
+{ return a.get_position() >= b.get_position(); }
+
+template<class T, class Array_type>
+array_iterator<T,Array_type>
+operator+(const array_iterator<T,Array_type>& a,
+          typename array_iterator<T,Array_type>::difference_type n) noexcept
+{
+  array_iterator<T,Array_type> it = a;
+  it += n;
+
+  return it;
+}
+
+template<class T, class Array_type>
+array_iterator<T,Array_type>
+operator+(typename array_iterator<T,Array_type>::difference_type n,
+          const array_iterator<T,Array_type>& a) noexcept
+{ return  a + n; }
+
+template<class T, class Array_type>
+array_iterator<T,Array_type>
+operator-(const array_iterator<T,Array_type>& a,
+          typename array_iterator<T,Array_type>::difference_type n) noexcept
+{
+  array_iterator<T,Array_type> it = a;
+  it -= n;
+
+  return it;
+}
+
+template<class T, class Array_type>
+array_iterator<T,Array_type>
+operator-(typename array_iterator<T,Array_type>::difference_type n,
+          const array_iterator<T,Array_type>& a) noexcept
+{ return  a - n; }
+
 }
 
 template<class T>
@@ -328,7 +290,7 @@ public:
 
   explicit device_array(const qcl::device_context_ptr& ctx,
                         const std::vector<T>& initial_data)
-    : _ctx{ctx}
+    : _ctx{ctx}, _num_elements{initial_data.size()}
   {
     assert(initial_data.size() > 0);
 
@@ -339,7 +301,7 @@ public:
 
   explicit device_array(const qcl::device_context_ptr& ctx,
                         std::size_t num_elements)
-    : _ctx{ctx}
+    : _ctx{ctx}, _num_elements{num_elements}
   {
     _ctx->create_buffer<T>(_buff, num_elements);
   }
