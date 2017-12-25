@@ -339,6 +339,13 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 #define QCL_RAW(source) BOOST_PP_STRINGIZE(source) "\n"
 /// Stringizes the argument as single line and adds a newline.
 #define QCL_SINGLE_LINE(source) "\n" QCL_RAW(source)
+/// Defines a preprocessor command in qcl code. This avoids having
+/// the preprocessor confused due to CL preprocessor commands that
+/// start with # as well but should be stringized. Example:
+/// \c QCL_PREPROCESSOR(define, NUMBER 1234) is equivalent to
+/// \c #define NUMBER 1234
+#define QCL_PREPROCESSOR(command, content) \
+  "\n#" BOOST_PP_STRINGIZE(command) " " BOOST_PP_STRINGIZE(content) "\n"
 
 
 

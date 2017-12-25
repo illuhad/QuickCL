@@ -126,6 +126,75 @@ using buffer_ptr = std::shared_ptr<cl::Buffer>;
 using command_queue_id = std::size_t;
 
 
+
+template<class T>
+class local_memory
+{
+public:
+  local_memory(std::size_t num_elements)
+    : _num_elements{num_elements}
+  {}
+
+  std::size_t get_num_elements() const
+  {
+    return _num_elements;
+  }
+
+  std::size_t get_size() const
+  {
+    return _num_elements * sizeof(T);
+  }
+private:
+  std::size_t _num_elements;
+};
+
+template<class T>
+class raw_memory
+{
+public:
+  raw_memory(T* data, std::size_t num_bytes)
+    : _data{data}, _num_bytes{num_bytes}
+  {}
+
+  T* get_data() const
+  {
+    return _data;
+  }
+
+  std::size_t get_size() const
+  {
+    return _num_bytes;
+  }
+private:
+  T* _data;
+  std::size_t _num_bytes;
+};
+
+namespace detail {
+
+/// Set of overloads to allow passing
+/// QCL memory wrapper objects directly as kernel arguments
+template<class T>
+cl_int set_kernel_arg(std::size_t pos,
+                      const kernel_ptr& kernel,
+                      const T& data)
+{ return kernel->setArg(pos, data); }
+
+template<class T>
+cl_int set_kernel_arg(std::size_t pos,
+                      const kernel_ptr& kernel,
+                      const local_memory<T>& local_mem)
+{ return kernel->setArg(pos, nullptr, local_mem.get_size()); }
+
+template<class T>
+cl_int set_kernel_arg(std::size_t pos,
+                      const kernel_ptr &kernel,
+                      const raw_memory<T> &mem)
+{ return kernel->setArg(pos, mem.get_data(), mem.get_size()); }
+
+
+} // detail
+
 /// This class simplifies passing arguments to kernels
 /// by counting the argument index automatically.
 class kernel_argument_list
@@ -146,7 +215,8 @@ public:
   template<class T>
   cl_int push(const T& data)
   {
-    cl_int err = _kernel->setArg(_num_arguments, data);
+    cl_int err = detail::set_kernel_arg(_num_arguments,
+                                        _kernel, data);
 
     ++_num_arguments;
     return err;
@@ -934,48 +1004,6 @@ using const_device_context_ptr = std::shared_ptr<const device_context>;
 
 
 
-template<class T>
-class local_memory
-{
-public:
-  local_memory(std::size_t num_elements)
-    : _num_elements{num_elements}
-  {}
-
-  std::size_t get_num_elements() const
-  {
-    return _num_elements;
-  }
-
-  std::size_t get_size() const
-  {
-    return _num_elements * sizeof(T);
-  }
-private:
-  std::size_t _num_elements;
-};
-
-template<class T>
-class raw_memory
-{
-public:
-  raw_memory(T* data, std::size_t num_bytes)
-    : _data{data}, _num_bytes{num_bytes}
-  {}
-
-  T* get_data() const
-  {
-    return _data;
-  }
-
-  std::size_t get_size() const
-  {
-    return _num_bytes;
-  }
-private:
-  T* _data;
-  std::size_t _num_bytes;
-};
 
 class kernel_call
 {
@@ -1020,7 +1048,7 @@ public:
   template<typename... Args>
   void partial_argument_list(Args... arguments)
   {
-    this->configure_arguments(arguments);
+    this->configure_arguments(arguments...);
   }
 
   void discard_partial_arguments()
@@ -1050,18 +1078,6 @@ private:
   void push_argument(const T& x)
   {
     _args.push(x);
-  }
-
-  template<class T>
-  void push_argument(const local_memory<T>& x)
-  {
-    _args.push(nullptr, x.get_size());
-  }
-
-  template<class T>
-  void push_argument(const raw_memory<T>& x)
-  {
-    _args.push(x.get_data(), x.get_size());
   }
 
   qcl::device_context_ptr _ctx;
