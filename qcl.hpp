@@ -170,7 +170,11 @@ private:
   std::size_t _num_bytes;
 };
 
+template<class T>
+class device_array;
+
 namespace detail {
+
 
 /// Set of overloads to allow passing
 /// QCL memory wrapper objects directly as kernel arguments
@@ -192,6 +196,10 @@ cl_int set_kernel_arg(std::size_t pos,
                       const raw_memory<T> &mem)
 { return kernel->setArg(pos, mem.get_data(), mem.get_size()); }
 
+template<class T>
+cl_int set_kernel_arg(std::size_t pos,
+                      const kernel_ptr& kernel,
+                      const device_array<T>& array);
 
 } // detail
 

@@ -282,6 +282,10 @@ public:
   using const_remote_iterator =
     detail::array_iterator<const T, const device_array<T>>;
 
+  device_array()
+    : _num_elements{0}
+  {}
+
   explicit device_array(const qcl::device_context_ptr& ctx,
                         const cl::Buffer& buff,
                         std::size_t num_elements)
