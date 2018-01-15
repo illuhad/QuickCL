@@ -212,6 +212,7 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 #define QCL_MAKE_MODULE(module_name)                           \
     typedef module_name _qcl_this_type;                        \
     static std::string _qcl_get_module_name()                  \
+    friend class ::qcl::device_context;                        \
     {return typeid(_qcl_this_type).name();}
 
 
@@ -234,7 +235,6 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 /// \endcode
 /// \param source_code A string containing the CL source code.
 #define QCL_MAKE_SOURCE(source_code) \
-  friend class ::qcl::device_context; \
   static std::string _qcl_source()              \
   {                                             \
     std::string code = source_code;             \
