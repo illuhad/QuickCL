@@ -234,6 +234,7 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 /// \endcode
 /// \param source_code A string containing the CL source code.
 #define QCL_MAKE_SOURCE(source_code) \
+  friend class ::qcl::device_context; \
   static std::string _qcl_source()              \
   {                                             \
     std::string code = source_code;             \
