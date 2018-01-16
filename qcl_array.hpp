@@ -286,13 +286,13 @@ public:
     : _num_elements{0}
   {}
 
-  explicit device_array(const qcl::device_context_ptr& ctx,
+  explicit device_array(const device_context_ptr& ctx,
                         const cl::Buffer& buff,
                         std::size_t num_elements)
     : _ctx{ctx}, _buff{buff}, _num_elements{num_elements}
   {}
 
-  explicit device_array(const qcl::device_context_ptr& ctx,
+  explicit device_array(const device_context_ptr& ctx,
                         const std::vector<T>& initial_data)
     : _ctx{ctx}, _num_elements{initial_data.size()}
   {
@@ -303,7 +303,7 @@ public:
   }
 
 
-  explicit device_array(const qcl::device_context_ptr& ctx,
+  explicit device_array(const device_context_ptr& ctx,
                         std::size_t num_elements)
     : _ctx{ctx}, _num_elements{num_elements}
   {
@@ -426,11 +426,16 @@ public:
                 begin(), end(),
                 evt, dependencies, queue);
   }
+
+  const device_context_ptr& get_context() const
+  {
+    return _ctx;
+  }
 private:
 
-  cl::Buffer _buff;
+  device_context_ptr _ctx;
 
-  qcl::device_context_ptr _ctx;
+  cl::Buffer _buff;
   std::size_t _num_elements;
 };
 
