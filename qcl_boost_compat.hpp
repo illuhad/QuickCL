@@ -38,6 +38,7 @@
 #include <boost/compute.hpp>
 
 #include "qcl.hpp"
+#include "qcl_array.hpp"
 
 namespace qcl {
 
@@ -48,6 +49,14 @@ boost::compute::buffer_iterator<T> create_buffer_iterator(const cl::Buffer& buff
 {
   return boost::compute::make_buffer_iterator<T>(boost::compute::buffer{buffer.get()},
                                                  position);
+}
+
+template<class T>
+static boost::compute::buffer_iterator<T>
+create_buffer_iterator(const device_array<T>& array,
+                       std::size_t position)
+{
+  return create_buffer_iterator<T>(array.get_buffer(), position);
 }
 
 boost::compute::context
