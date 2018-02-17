@@ -188,7 +188,7 @@ template<class T>
 cl_int set_kernel_arg(std::size_t pos,
                       const kernel_ptr& kernel,
                       const local_memory<T>& local_mem)
-{ return kernel->setArg(pos, nullptr, local_mem.get_size()); }
+{ return kernel->setArg(pos, local_mem.get_size(), nullptr); }
 
 template<class T>
 cl_int set_kernel_arg(std::size_t pos,
