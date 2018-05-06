@@ -963,6 +963,7 @@ private:
 
       std::stringstream sstr;
       sstr << get_device_name() << ": Could not compile CL source: " << log; 
+      sstr << std::endl << std::endl << "Source was: " << program_src;
       std::string err_msg = sstr.str();
 
       throw std::runtime_error(err_msg);
