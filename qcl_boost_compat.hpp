@@ -29,13 +29,21 @@
 #ifndef QCL_BOOST_COMPUTE_COMPAT_HPP
 #define QCL_BOOST_COMPUTE_COMPAT_HPP
 
+#define BOOST_COMPUTE_MEM_LEAK_WORKAROUND
+
+#ifdef BOOST_COMPUTE_MEM_LEAK_WORKAROUND
+#include "workaround/boost_compute_mem_leak.hpp"
+#endif
+
 #include <boost/compute.hpp>
 
 #include "qcl.hpp"
+#include "qcl_array.hpp"
 
 namespace qcl {
 
 template<class T>
+static
 boost::compute::buffer_iterator<T> create_buffer_iterator(const cl::Buffer& buffer,
                                                           std::size_t position)
 {
@@ -43,7 +51,16 @@ boost::compute::buffer_iterator<T> create_buffer_iterator(const cl::Buffer& buff
                                                  position);
 }
 
+template<class T>
+static boost::compute::buffer_iterator<T>
+create_buffer_iterator(const device_array<T>& array,
+                       std::size_t position)
+{
+  return create_buffer_iterator<T>(array.get_buffer(), position);
+}
+
 boost::compute::context
+static
 create_boost_compute_context(const device_context_ptr& ctx)
 {
   return boost::compute::context{ctx->get_context().get()};

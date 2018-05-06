@@ -212,13 +212,12 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 #define QCL_MAKE_MODULE(module_name)                           \
     typedef module_name _qcl_this_type;                        \
     static std::string _qcl_get_module_name()                  \
-    {return typeid(_qcl_this_type).name();}
+    {return typeid(_qcl_this_type).name();}                    \
+    static std::string _qcl_source(){return _qcl_private_source();}
 
 
 /// This macro, together with \c QCL_MAKE_MODULE is required
-/// to turn an existing class into a QCL module. This macro
-/// must be called in the public section of the class that should
-/// become a qcl module.
+/// to turn an existing class into a QCL module.
 /// This call can have
 /// nested calls to \c QCL_INCLUDE_MODULE, \c QCL_IMPORT_TYPE and
 /// \c QCL_IMPORT_CONSTANT. These calls must not be the last calls
@@ -234,7 +233,7 @@ DECLARE_TYPE_TRANSLATOR(cl_ulong16, ulong16);
 /// \endcode
 /// \param source_code A string containing the CL source code.
 #define QCL_MAKE_SOURCE(source_code) \
-  static std::string _qcl_source()              \
+  static std::string _qcl_private_source()      \
   {                                             \
     std::string code = source_code;             \
     std::string include_guard = "QCL_MODULE_"+_qcl_get_module_name()+"_CL"; \
