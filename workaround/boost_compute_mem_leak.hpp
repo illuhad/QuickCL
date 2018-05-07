@@ -214,12 +214,13 @@ inline OutputIterator scan_impl(InputIterator first,
         block_count++;
     }
 
-    ::boost::compute::vector<input_type> block_sums(block_count, context);
-
     // zero block sums
     input_type zero;
     std::memset(&zero, 0, sizeof(input_type));
-    ::boost::compute::fill(block_sums.begin(), block_sums.end(), zero, queue);
+
+    std::vector<input_type> host_block_sums(block_count, zero);
+    ::boost::compute::vector<input_type> block_sums(host_block_sums.begin(), host_block_sums.end(),
+                                                    queue);
 
     // local scan
     local_scan_kernel<InputIterator, OutputIterator, BinaryOperator>
