@@ -960,6 +960,7 @@ private:
     {
       std::string log;
       program.getBuildInfo(_device, CL_PROGRAM_BUILD_LOG, &log);
+      detail::remove_zeros(log);
 
       std::stringstream sstr;
       sstr << get_device_name() << ": Could not compile CL source: " << log; 
