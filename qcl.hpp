@@ -907,6 +907,34 @@ public:
   }
 
 
+  /// \return A string containing the build options for kernels compiled
+  /// for this device context
+  const std::string& get_build_options() const
+  {
+    return _build_options;
+  }
+
+  /// Sets the build options passed to the OpenCL compiler to the options
+  /// specified by the \c option_string parameter.
+  void set_build_options(const std::string& option_string)
+  {
+    _build_options = option_string;
+  }
+
+  /// Appends the supplied build option \c option to the options
+  /// passed to the OpenCL compiler
+  void append_build_option(const std::string& option)
+  {
+    _build_options += " ";
+    _build_options += option;
+  }
+
+  /// Enables relaxed math optimizations by passing the -cl-fast-relaxed-math
+  /// flag to the compiler.
+  void enable_fast_relaxed_math()
+  {
+    this->append_build_option("-cl-fast-relaxed-math");
+  }
 
 private:
 
@@ -954,12 +982,14 @@ private:
 
     program = cl::Program(_context, src);
 
-    cl_int err = program.build(std::vector<cl::Device>(1,_device), "");
+    cl_int err = program.build(std::vector<cl::Device>(1,_device),
+                               _build_options.c_str());
 
     if(err != CL_SUCCESS)
     {
       std::string log;
       program.getBuildInfo(_device, CL_PROGRAM_BUILD_LOG, &log);
+      detail::remove_zeros(log);
 
       std::stringstream sstr;
       sstr << get_device_name() << ": Could not compile CL source: " << log; 
@@ -1006,6 +1036,9 @@ private:
   
   /// The type of this device
   cl_device_type _device_type;
+
+  /// The build options for kernels on this device
+  std::string _build_options;
 };
 
 using device_context_ptr = std::shared_ptr<device_context>;
