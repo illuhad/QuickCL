@@ -62,6 +62,8 @@
 #include <map>
 #include <cassert>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace qcl {
 
@@ -76,6 +78,63 @@ static void remove_zeros(std::string& s)
   while((pos = s.find('\0')) != std::string::npos)
     s.erase(pos, 1);
 }
+
+/// The processor for the QCL meta language. This
+/// is particularly useful in conjunction with modules.
+class meta_source_processor
+{
+public:
+  std::string operator()(const std::string& source) const
+  {
+    std::string result;
+
+    for(std::size_t i = 0; i < source.size();)
+    {
+      if(source[i] == '$')
+      {
+        // Find terminating $
+        std::size_t terminating_char = source.find('$', i+1);
+        if(terminating_char == std::string::npos)
+          throw std::invalid_argument{"Error processing QCL source: "
+                                      "Expected terminating $ for $ starting at ...\""
+                                      +source.substr(i)+"\""};
+        std::string command_string = source.substr(i+1, terminating_char-i-1);
+
+        std::vector<std::string> elements;
+        boost::algorithm::split(elements, command_string, boost::algorithm::is_any_of(" \t\n"));
+
+        if(elements.size() > 0)
+        {
+          if(elements[0] == "pp")
+          {
+            result += "\n#";
+            for(std::size_t j = 1; j < elements.size(); ++j)
+            {
+              result += " ";
+              result += elements[j];
+            }
+            result += "\n";
+          }
+          else
+          {
+            throw std::invalid_argument{"Error processing QCL source: Encountered "
+                                        "invalid QCL meta command: "+elements[0]+
+                                        " (command string: "+command_string+")"};
+          }
+        }
+
+        i = terminating_char + 1;
+      }
+      else
+      {
+        result += source[i];
+        ++i;
+      }
+    }
+    return result;
+
+  }
+};
 
 }
 
@@ -476,8 +535,10 @@ public:
       auto cached_program = _program_cache.find(program_name);
       if(cached_program == _program_cache.end())
       {
+        detail::meta_source_processor source_processor;
+
         cl::Program prog;
-        compile_source(source_code, prog);
+        compile_source(source_processor(source_code), prog);
         _program_cache[program_name] = prog;
       }
     
