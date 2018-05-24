@@ -942,22 +942,27 @@ public:
                                 command_queue_id queue = 0)
   {
     assert(queue < get_num_command_queues());
-    assert(minimum_num_work_items.dimensions() == num_local_items.dimensions());
 
     cl::NDRange global = minimum_num_work_items;
-    for(std::size_t i = 0; i < minimum_num_work_items.dimensions(); ++i)
+    // Only make the global size a multiple of the lcoal size
+    // if we are not using a NullRange, i.e. the dimensions are > 0
+    if(num_local_items.dimensions() > 0)
     {
-      std::size_t work_items = minimum_num_work_items.get()[i];
-      std::size_t local_items = num_local_items.get()[i];
+      assert(minimum_num_work_items.dimensions() == num_local_items.dimensions());
 
-      std::size_t multiple = (work_items/local_items)*local_items;
-      if(multiple != work_items)
-        multiple += local_items;
+      for(std::size_t i = 0; i < minimum_num_work_items.dimensions(); ++i)
+      {
+        std::size_t work_items = minimum_num_work_items.get()[i];
+        std::size_t local_items = num_local_items.get()[i];
 
-      assert(multiple % local_items == 0 && multiple >= work_items);
-      global.get()[i] = multiple;
+        std::size_t multiple = (work_items/local_items)*local_items;
+        if(multiple != work_items)
+          multiple += local_items;
+
+        assert(multiple % local_items == 0 && multiple >= work_items);
+        global.get()[i] = multiple;
+      }
     }
-
     cl_int err = get_command_queue(queue).enqueueNDRangeKernel(*kernel,
                                                                offset,
                                                                global,
