@@ -359,7 +359,7 @@ public:
             std::vector<cl::Event>* dependencies = nullptr,
             command_queue_id queue = 0) const
   {
-    _ctx->memcpy_d2h_async(out.data(),
+    _ctx->memcpy_d2h_async(out,
                            _buff,
                            begin.get_position(),
                            end.get_position(),
