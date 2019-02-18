@@ -62,6 +62,8 @@
 #include <map>
 #include <cassert>
 
+#include <boost/algorithm/string.hpp>
+
 
 namespace qcl {
 
@@ -76,6 +78,63 @@ static void remove_zeros(std::string& s)
   while((pos = s.find('\0')) != std::string::npos)
     s.erase(pos, 1);
 }
+
+/// The processor for the QCL meta language. This
+/// is particularly useful in conjunction with modules.
+class meta_source_processor
+{
+public:
+  std::string operator()(const std::string& source) const
+  {
+    std::string result;
+
+    for(std::size_t i = 0; i < source.size();)
+    {
+      if(source[i] == '$')
+      {
+        // Find terminating $
+        std::size_t terminating_char = source.find('$', i+1);
+        if(terminating_char == std::string::npos)
+          throw std::invalid_argument{"Error processing QCL source: "
+                                      "Expected terminating $ for $ starting at ...\""
+                                      +source.substr(i)+"\""};
+        std::string command_string = source.substr(i+1, terminating_char-i-1);
+
+        std::vector<std::string> elements;
+        boost::algorithm::split(elements, command_string, boost::algorithm::is_any_of(" \t\n"));
+
+        if(elements.size() > 0)
+        {
+          if(elements[0] == "pp")
+          {
+            result += "\n#";
+            for(std::size_t j = 1; j < elements.size(); ++j)
+            {
+              result += " ";
+              result += elements[j];
+            }
+            result += "\n";
+          }
+          else
+          {
+            throw std::invalid_argument{"Error processing QCL source: Encountered "
+                                        "invalid QCL meta command: "+elements[0]+
+                                        " (command string: "+command_string+")"};
+          }
+        }
+
+        i = terminating_char + 1;
+      }
+      else
+      {
+        result += source[i];
+        ++i;
+      }
+    }
+    return result;
+
+  }
+};
 
 }
 
@@ -476,8 +535,10 @@ public:
       auto cached_program = _program_cache.find(program_name);
       if(cached_program == _program_cache.end())
       {
+        detail::meta_source_processor source_processor;
+
         cl::Program prog;
-        compile_source(source_code, prog);
+        compile_source(source_processor(source_code), prog);
         _program_cache[program_name] = prog;
       }
     
@@ -881,22 +942,27 @@ public:
                                 command_queue_id queue = 0)
   {
     assert(queue < get_num_command_queues());
-    assert(minimum_num_work_items.dimensions() == num_local_items.dimensions());
 
     cl::NDRange global = minimum_num_work_items;
-    for(std::size_t i = 0; i < minimum_num_work_items.dimensions(); ++i)
+    // Only make the global size a multiple of the lcoal size
+    // if we are not using a NullRange, i.e. the dimensions are > 0
+    if(num_local_items.dimensions() > 0)
     {
-      std::size_t work_items = minimum_num_work_items.get()[i];
-      std::size_t local_items = num_local_items.get()[i];
+      assert(minimum_num_work_items.dimensions() == num_local_items.dimensions());
 
-      std::size_t multiple = (work_items/local_items)*local_items;
-      if(multiple != work_items)
-        multiple += local_items;
+      for(std::size_t i = 0; i < minimum_num_work_items.dimensions(); ++i)
+      {
+        std::size_t work_items = minimum_num_work_items.get()[i];
+        std::size_t local_items = num_local_items.get()[i];
 
-      assert(multiple % local_items == 0 && multiple >= work_items);
-      global.get()[i] = multiple;
+        std::size_t multiple = (work_items/local_items)*local_items;
+        if(multiple != work_items)
+          multiple += local_items;
+
+        assert(multiple % local_items == 0 && multiple >= work_items);
+        global.get()[i] = multiple;
+      }
     }
-
     cl_int err = get_command_queue(queue).enqueueNDRangeKernel(*kernel,
                                                                offset,
                                                                global,
@@ -907,6 +973,34 @@ public:
   }
 
 
+  /// \return A string containing the build options for kernels compiled
+  /// for this device context
+  const std::string& get_build_options() const
+  {
+    return _build_options;
+  }
+
+  /// Sets the build options passed to the OpenCL compiler to the options
+  /// specified by the \c option_string parameter.
+  void set_build_options(const std::string& option_string)
+  {
+    _build_options = option_string;
+  }
+
+  /// Appends the supplied build option \c option to the options
+  /// passed to the OpenCL compiler
+  void append_build_option(const std::string& option)
+  {
+    _build_options += " ";
+    _build_options += option;
+  }
+
+  /// Enables relaxed math optimizations by passing the -cl-fast-relaxed-math
+  /// flag to the compiler.
+  void enable_fast_relaxed_math()
+  {
+    this->append_build_option("-cl-fast-relaxed-math");
+  }
 
 private:
 
@@ -954,7 +1048,8 @@ private:
 
     program = cl::Program(_context, src);
 
-    cl_int err = program.build(std::vector<cl::Device>(1,_device), "");
+    cl_int err = program.build(std::vector<cl::Device>(1,_device),
+                               _build_options.c_str());
 
     if(err != CL_SUCCESS)
     {
@@ -1007,6 +1102,9 @@ private:
   
   /// The type of this device
   cl_device_type _device_type;
+
+  /// The build options for kernels on this device
+  std::string _build_options;
 };
 
 using device_context_ptr = std::shared_ptr<device_context>;

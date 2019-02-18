@@ -32,6 +32,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 #include <boost/preprocessor/stringize.hpp>
 #include <CL/cl2.hpp>
